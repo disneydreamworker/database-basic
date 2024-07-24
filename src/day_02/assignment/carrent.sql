@@ -1,3 +1,4 @@
+drop database carrent;
 create database carrent;
 use carrent;
 
@@ -61,8 +62,9 @@ CREATE TABLE camper (
 ALTER TABLE camper ADD CONSTRAINT c_id FOREIGN KEY (c_rental_company_id) REFERENCES camper_rental_company(c_rental_company_id); -- 캠핑카대여회사ID 속성을 캠핑카대여회사 릴레이션의 PK와 연결하여 FK로 지정
 
 
+drop table camper_rent;
 -- 캠핑카대여 릴레이션 생성
-CREATE TABLE camper (
+CREATE TABLE camper_rent (
 	rental_id INT UNSIGNED AUTO_INCREMENT COMMENT '대여번호',
 	camper_regi_id	INT UNSIGNED NOT NULL COMMENT '캠핑카등록ID',
 	client_driver_license VARCHAR(20) NOT NULL COMMENT '운전면허증번호',
@@ -72,11 +74,31 @@ CREATE TABLE camper (
 	rental_bill_charges	INT UNSIGNED NOT NULL COMMENT '청구요금',
 	rental_payment_due DATE NOT NULL COMMENT '납입기한',
 	extra_bill_breakdown VARCHAR(40) COMMENT '기타청구내역', 
-	extra_bill_charges	기타청구요금
+	extra_bill_charges INT UNSIGNED COMMENT '기타청구요금',
+    PRIMARY KEY (rental_id)
 );
 
 
+drop table camper_maintenance_info;
+-- 캠핑카정비정보 릴레이션 생성
+CREATE TABLE camper_maintenance_info (
+	maintenance_id	INT UNSIGNED AUTO_INCREMENT COMMENT '정비번호',
+	camper_regi_id	INT UNSIGNED NOT NULL COMMENT '캠핑카등록ID',
+	c_maintenance_company_id	INT UNSIGNED NOT NULL COMMENT '캠핑카정비소ID',
+	c_rental_company_id	INT UNSIGNED NOT NULL COMMENT '캠핑카대여회사ID',
+	client_driver_license VARCHAR(20) NOT NULL COMMENT '고객운전면허증번호',
+	maintenance_details	VARCHAR(40) NOT NULL COMMENT '정비내역',
+	maintenance_date	DATE NOT NULL COMMENT '수리날짜',
+	maintenance_fee	INT UNSIGNED NOT NULL COMMENT '수리비용',
+	maintenance_payment_due	DATE NOT NULL COMMENT '납입기한',
+	extra_maintenance_details	VARCHAR(40) COMMENT	'기타정비내역',
+    PRIMARY KEY (maintenance_id)
+);
 
+ALTER TABLE camper_maintenance_info ADD CONSTRAINT c_regi_id_fk FOREIGN KEY (camper_regi_id) REFERENCES camper(camper_regi_id);
+ALTER TABLE camper_maintenance_info ADD CONSTRAINT  c_m_id_fk FOREIGN KEY (c_maintenance_company_id) REFERENCES camper_maintenace_company(c_maintenance_company_id);
+ALTER TABLE camper_maintenance_info ADD CONSTRAINT c_r_id_fk FOREIGN KEY (c_rental_company_id) REFERENCES camper_rental_company(c_rental_company_id);
+ALTER TABLE camper_maintenance_info ADD CONSTRAINT client_id_fk FOREIGN KEY (client_driver_license) REFERENCES client(client_driver_license);
 
 
 
