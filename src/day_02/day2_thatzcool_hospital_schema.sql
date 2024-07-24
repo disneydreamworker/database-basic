@@ -2,6 +2,7 @@
 -- create database hospital;
 -- grant all privilegs on hospital.* to ssgdoctor@localhost with grant option;
 -- flush privilegs;
+create database hospital2;
 
 USE hospital;
 
