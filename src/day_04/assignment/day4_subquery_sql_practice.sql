@@ -115,10 +115,11 @@ select salary from employees where salary > 17000;
 select 
 	employee_id 사원번호,
     concat(first_name, ' ', last_name) 이름,
-    job_id 담당업무,
+    jobs.job_title 담당업무,
     salary 급여
-from employees
-where salary > (select salary from employees where last_name = 'Kochhar');
+from employees, jobs
+where employees.job_id = jobs.job_id
+	and salary > (select salary from employees where last_name = 'Kochhar');
 
 
 /* 문제 7] 급여의 평균보다 적은 사원의 사원번호,이름,담당업무,급여,부서번호를 출력하시오 */
@@ -127,11 +128,12 @@ select avg(salary) from employees;
 select 
 	employee_id 사원번호,
     concat(first_name, ' ', last_name) 이름,
-    job_id 담당업무,
+    jobs.job_title 담당업무,
     salary 급여,
     department_id 부서번호
-from employees
-where salary < (select avg(salary) from employees);
+from employees, jobs
+where employees.job_id = jobs.job_id
+	and salary < (select avg(salary) from employees);
 
 
 /*문제 8] 100번 부서의 최소 급여보다 최소 급여가 많은 다른 모든 부서를 출력하시오*/
@@ -145,6 +147,13 @@ from employees
 where department_id in 
 	(select department_id from employees group by department_id having min(salary) > 
     (select min(salary) from employees where department_id = 100));
+
+-- 다른 답안
+select distinct d.department_id 
+from employees e, departments d
+where e.department_id = d.department_id
+group by e.department_id;
+-- having 
 
 
 /*문제 9] 업무별로 최소 급여를 받는 사원의 정보를 사원번호,이름,업무,부서번호를 출력하시오. 출력시 업무별로 정렬하시오*/
@@ -164,6 +173,20 @@ where (e.job_id, e.salary) in (
 )
 order by job_id;
 
+-- 다른 답안
+select 
+	e.employee_id 사원번호,
+    concat(e.first_name, ' ', e.last_name) 이름,
+    e.job_id 업무,
+    e.department_id 부서번호,
+    e.salary
+from employees e
+	join (
+		select min(salary) salary, job_id
+		from employees
+        group by job_id ) as ms 
+	on e.salary = ms.salary and e.job_id = ms.job_id;
+
 
 /*문제 10] 100번 부서의 최소 급여보다 최소 급여가 적은 다른 모든 부서를 출력하시오*/
 select min(salary) from employees where department_id = 100; -- 6900
@@ -174,8 +197,17 @@ from employees
 where department_id in 
 	(select department_id from employees group by department_id having min(salary) < 
     (select min(salary) from employees where department_id = 100));
-    
-    
+
+-- 다른 답안
+select department_id, min(salary)
+from employees
+group by department_id
+having min(salary) > any (
+	select min(salary)
+    from employees
+    where department_id = 100);
+
+
 /*문제 11] 업무가 SA_MAN인 사원의 정보를 이름,업무,부서명,근무지를 출력하시오.*/
 select employee_id from employees where job_id = 'SA_MAN'; -- 5명
 select
@@ -186,6 +218,14 @@ select
 from employees e, departments d, locations l
 where e.department_id = d.department_id and d.location_id = l.location_id and e.employee_id in (select employee_id from employees where job_id = 'SA_MAN');
 
+-- 다른 답안
+select *
+from 
+	(select first_name, last_name, job_id, department_id from employees where job_id = 'SA_MAN') e,
+	(select department_id, department_name, location_id from departments) d,
+    (select location_id, city from locations) l
+where e.department_id = d.department_id and d.location_id = l.location_id;
+
 
 /*문제 12] 가장 많은 부하직원을 갖는 MANAGER의 사원번호와 이름을 출력하시오*/
 select count(employee_id), manager_id from employees group by manager_id;
@@ -195,22 +235,31 @@ select
 	employee_id 사원번호,
     concat(first_name, ' ', last_name) 이름
 from employees
-where employee_id = (
-	select manager_id
-    from (
-		select manager_id, count(employee_id) as cnt
-        from employees
-        group by manager_id
-	) as Managers
-    where cnt = (
-		select max(cnt)
-        from (
-			select count(employee_id) as cnt
-            from employees
-            group by manager_id
-		) as MaxManagers
+where employee_id = (select manager_id
+					from (
+						select manager_id, count(employee_id) as cnt
+						from employees
+						group by manager_id
+					) as Managers
+					where cnt = (
+						select max(cnt)
+						from (
+							select count(employee_id) as cnt
+							from employees
+							group by manager_id
+						) as MaxManagers
 	)
 );
+
+-- 다른 답안 
+SELECT e.employee_id, CONCAT(e.first_name, ' ', e.last_name) AS Name
+FROM employees e
+WHERE e.employee_id = (SELECT manager_id
+                       FROM employees e
+                       GROUP BY manager_id
+                       ORDER BY COUNT(manager_id) DESC
+                       LIMIT 1);
+
 
 /*문제 13] 사원번호가 123인 사원의 업무가 같고 사원번호가 192인 사원의 급여(SAL))보다 많은 사원의 사원번호,이름,직업,급여를 출력하시오 */
 select job_id
