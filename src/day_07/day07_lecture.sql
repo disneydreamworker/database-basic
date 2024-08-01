@@ -12,20 +12,30 @@ SELECT REPLACE(BOOKNAME,'야구','농구')BOOKNAME FROM BOOK;
 SELECT bookname '제목' , CHAR_LENGTH(bookname)'문자수',LENGTH(bookname)'바이트수'
 FROM BOOK
 WHERE publisher = '굿스포츠';
+
+
 SELECT * FROM CUSTOMER;
 SELECT SUBSTR(name,1,1)'성' , count(*)'인원'
 from customer
 GROUP BY SUBSTR(name,1,1);
+
+
 SELECT orderid '주문번호', orderdate '주문일', ADDDATE(orderdate,interval 10 DAY)'확정일'
 FROM ORDERS;
+
+
 SELECT orderid '주문번호', DATE_FORMAT(orderdate,'%Y-%m-%d')'주문일',custid'고객번호',bookid'도서번호'
 FROM Orders
 WHERE orderdate = STR_TO_DATE('20240707','%Y%m%d');
+
+
 SELECT SYSDATE(),NOW(), DATE_FORMAT(SYSDATE(),'%Y/%m/%d %a %h:%i') 'SYSDATE_1';
+
 CREATE TABLE MYBOOK(bookid int auto_increment primary key, price int );
 insert into mybook values(null,10000);
 insert into mybook values(null,20000);
 insert into mybook values(null,null);
+
 select sum(price)'총합' from mybook;
 select price + 100 from mybook where bookid = 3;
 select sum(price), avg(price),count(*), count(price)from mybook;
@@ -33,10 +43,14 @@ select * from mybook where price is null;
 select * from mybook where price= ''; -- 우리 반은 없어야 함
 select name '이름', ifnull(phone,'연락처 없음')'전화번호' from customer;
 select * from customer;
+
+
 SET @seq:=0;
 SELECT (@seq:=@seq+1)'순번' , custid, name, phone
 FROM Customer
 WHERE @seq<2;
+
+
 CREATE VIEW Vorders
 AS SELECT o.orderid, o.custid,c.name, o.bookid,b.bookname,o.saleprice,o.orderdate
    FROM Customer c, Orders o, Book b
