@@ -206,3 +206,47 @@ delimiter ;
 
 call WhileProc1;
 
+
+-- 1~100 의 합에서 7의 배수는 제외하고 누적값이 1000이 넘어가면 종료
+drop procedure WhileProc2;
+delimiter $$
+create procedure WhileProc2()
+begin
+	declare i int;
+    declare total int;
+    
+    set i = 1;
+    set total = 0;
+    
+    myWhile: while (i<=100) do
+		if (i%7=0) 
+			then set i=i+1;
+			iterate myWhile; -- 내가 지정한 그 위치로 다시 돌아가서 계속 진행한다. continue와 동일
+        end if;
+        
+		set total = total+i;
+        
+        if (total > 1000)
+			then leave myWhile; -- 내가 지정한 와일문을 종료한다. break와 동일
+		end if;
+        
+        set i = i+1;
+    end while;
+    select total;
+end $$
+delimiter ;
+
+call WhileProc2;
+
+
+-- Exception 처리하기
+drop procedure errProc;
+delimiter $
+create procedure errProc()
+begin 
+	declare continue handler for 1146 select '테이블이 존재하지 않습니다' as '메세지';
+    select * from noTable;
+end $
+delimiter ;
+call errProc();
+
