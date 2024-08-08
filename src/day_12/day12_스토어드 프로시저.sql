@@ -48,10 +48,14 @@ call userProc3('테스트1', @myValue); -- 프로시저를 호출한다. 이때 
 select @myValue; -- 출력 매개 변수명으로 select 해서 출력한다
 
 
+drop procedure whileEx;
 -- while 문
 delimiter $$
 create procedure whileEx()
 begin
+	declare str varchar(100);
+    declare k int;
+    declare i int;
 	while (i < 10) do
 		set str = '';
         set k = 1;
@@ -60,12 +64,12 @@ begin
 			set k = k + 1;
 		end while;
         set i= i+1;
-        select str;
         end while;
 end $$
 delimiter ;
 call whileEx();
 
+-- 존재하는 프로시저 확인하기
 select * from information_schema.routines where routine_schema = 'bookstore' and routine_type = 'procedure';
 select * from information_schema.parameters where specific_name = 'userProc3';
 show create procedure bookstore.userProc3;
