@@ -135,3 +135,74 @@ select @print;
 call gradeProc2(40, @print);
 select @print;
 
+
+-- 문제 1
+drop procedure CustomerGradeProc;
+delimiter ^o^
+create procedure CustomerGradeProc()
+begin
+select A.userId, sum(구매액) as 총구매액, 
+	case
+		when sum(구매액) >= 1500 then '최우수고객'
+		when sum(구매액) >= 1000 then '우수고객'
+		when sum(구매액) >= 1 then '일반고객'
+        else '유령고객'
+	end '고객등급'
+from (
+	select userID, sum(price*amount) as 구매액
+	from buytbl
+	group by userId, price
+) as A right join usertbl B on A.userID = B.userID
+group by A.userId
+order by 구매액 desc;
+end ^o^
+delimiter ;
+
+call CustomerGradeProc;
+
+
+-- 문제 1-1
+drop procedure CustomerGradeProc2;
+delimiter ^o^
+create procedure CustomerGradeProc2(in name varchar(10))
+begin
+	declare userName varchar(10);
+    set userName = name;
+
+	select A.userId, sum(price*amount) as 총구매액, 
+		case
+			when sum(price*amount) >= 1500 then '최우수고객'
+			when sum(price*amount) >= 1000 then '우수고객'
+			when sum(price*amount) >= 1 then '일반고객'
+			else '유령고객'
+		end '고객등급'
+	from buytbl A right join usertbl B on A.userID = B.userID
+    where B.name = userName
+	group by A.userId;
+end ^o^
+delimiter ;
+
+call CustomerGradeProc2('바비킴');
+
+
+-- 1~100 의 합을 출력
+drop procedure WhileProc1;
+delimiter $$
+create procedure WhileProc1()
+begin
+	declare i int;
+    declare total int;
+    
+    set i = 1;
+    set total = 0;
+    
+    while (i<=100) do
+		set total = total+i;
+        set i= i+1;
+    end while;
+    select total;
+end $$
+delimiter ;
+
+call WhileProc1;
+
